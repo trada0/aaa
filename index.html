@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mở YouTube</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+  }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 20px;
+    text-align: center;
+  }
+  h1 {
+    font-size: 34px;
+    color: #111;
+    margin: 0 0 30px;
+    letter-spacing: 1px;
+  }
+  .btn-youtube {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+    max-width: 440px;
+    min-height: 100px;
+    background: #FF0000;
+    color: #fff;
+    font-size: 32px;
+    font-weight: bold;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+    padding: 15px 20px;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-youtube:active {
+    transform: scale(0.97);
+    background: #cc0000;
+  }
+  .btn-youtube svg {
+    width: 55px;
+    height: 55px;
+    flex-shrink: 0;
+  }
+  #status {
+    margin-top: 22px;
+    font-size: 22px;
+    color: #c62828;
+    font-weight: bold;
+    min-height: 30px;
+  }
+  .note {
+    margin-top: 30px;
+    max-width: 440px;
+    font-size: 21px;
+    line-height: 1.55;
+    color: #222;
+    background: #fff8e1;
+    border: 3px solid #ffc107;
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .note strong { color: #b71c1c; }
+</style>
+</head>
+<body>
+
+  <h1>MỞ YOUTUBE</h1>
+
+  <button id="openBtn" class="btn-youtube" type="button" aria-label="Mở YouTube">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4L15.8 12l-6.2 3.6z"/>
+    </svg>
+    <span id="btnText">MỞ YOUTUBE</span>
+  </button>
+
+  <div id="status">Bấm để bắt đầu</div>
+
+  <div class="note">
+    <strong>Lưu ý:</strong> Có quảng cáo 1–2 lần khi ấn vào mở YouTube để duy trì web. Xin cảm ơn!
+  </div>
+
+<script>
+(function () {
+  // 3 link quảng cáo, mở lần lượt theo từng lần bấm
+  var ADS = [
+    'https://s.shopee.vn/7KyOllInmT',
+    'https://vl-tiktok.com/f/07a26580.php',
+    'https://s.lazada.vn/s.EK4QJ?t=p-i2vvYos-sEM8qrc'
+  ];
+
+  var btn      = document.getElementById('openBtn');
+  var btnText  = document.getElementById('btnText');
+  var statusEl = document.getElementById('status');
+
+  // Đọc số lần đã bấm từ sessionStorage (giữ trạng thái khi quay lại)
+  var step = 0;
+  try {
+    step = parseInt(sessionStorage.getItem('adStep') || '0', 10) || 0;
+  } catch (e) { step = 0; }
+  if (step < 0) step = 0;
+  if (step > 3) step = 3;
+
+  function saveStep(v) {
+    try { sessionStorage.setItem('adStep', String(v)); } catch (e) {}
+  }
+
+  // Trang trắng hoàn toàn
+  function goBlank() {
+    try { document.title = ''; } catch (e) {}
+    document.documentElement.style.background = '#ffffff';
+    document.body.style.background = '#ffffff';
+    document.body.innerHTML = '';
+  }
+
+  // Cập nhật giao diện theo bước hiện tại
+  function render() {
+    if (step >= 3) { goBlank(); return; }
+    btnText.textContent = step === 0
+      ? 'MỞ YOUTUBE'
+      : 'MỞ YOUTUBE (' + step + '/3)';
+    statusEl.textContent = step === 0
+      ? 'Bấm để bắt đầu'
+      : 'Đã mở ' + step + '/3 — bấm tiếp tục';
+  }
+
+  render();
+
+  // Nếu popup bị chặn và phải chuyển cùng tab, khi quay lại trình duyệt
+  // sẽ khôi phục trạng thái từ sessionStorage
+  window.addEventListener('pageshow', function () {
+    var s = 0;
+    try { s = parseInt(sessionStorage.getItem('adStep') || '0', 10) || 0; } catch (e) {}
+    if (s !== step) { step = s; render(); }
+  });
+
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (step >= 3) return;
+
+    var adUrl = ADS[step];
+
+    // Mở quảng cáo ở tab mới → người dùng được "chuyển" sang link quảng cáo.
+    // Tab chính vẫn giữ nguyên → khi đóng tab quảng cáo, người dùng
+    // tự động "quay về link cũ" với trạng thái đã cập nhật sẵn.
+    var adWin = null;
+    try { adWin = window.open(adUrl, '_blank'); } catch (err) { adWin = null; }
+
+    // Tăng bước ngay lập tức
+    step++;
+    saveStep(step);
+
+    if (step >= 3) {
+      // Bấm lần thứ 3 → mở Lazada xong thì trang trắng
+      if (!adWin) {
+        // Popup bị chặn → chuyển cùng tab
+        window.location.href = adUrl;
+        return;
+      }
+      // Đã mở Lazada ở tab mới → trang chính chuyển trắng
+      setTimeout(goBlank, 300);
+      return;
+    }
+
+    // Bấm lần 1, 2 → cập nhật nút để bấm tiếp
+    if (!adWin) {
+      // Popup bị chặn → chuyển cùng tab, khi quay lại sẽ tự render lại
+      window.location.href = adUrl;
+      return;
+    }
+    render();
+  });
+})();
+</script>
+
+</body>
+</html>
